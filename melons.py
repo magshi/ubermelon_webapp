@@ -28,12 +28,14 @@ def show_melon(id):
 
 @app.route("/cart")
 def shopping_cart():
-
+    # if there's nothing in the cart, redirect to melons page
     if 'cart' not in session:
         return redirect("/melons")
 
+    # initialize empty dictionary for the melon count
     melon_count = {}
 
+    # this block iterates through a list of melon IDs and generates a dictionary with key: melon id, value: # of occurrences
     for melon_id in session['cart']:
         if melon_count.get(melon_id):
             melon_count[melon_id] += 1
@@ -42,36 +44,32 @@ def shopping_cart():
 
     print melon_count
     melon_dict = {}
+    cart_total = 0
 
+    #for each melon id, and the quantity for that melon type, in the melon_count dict, get the melon object associated with that melon id from the db using the model. Also calculates the total cost for the cart.
     for melon_id, qty in melon_count.iteritems():
         melon = model.get_melon_by_id(melon_id)
         melon_dict[melon] = qty
+        cart_total += (qty * melon.price)
 
     print melon_dict
 
+    #convert the cart total price to a two-digit float string
+    cart_total_float = "%0.2f" % cart_total
 
-    """TODO: Display the contents of the shopping cart. The shopping cart is a
-    list held in the session that contains all the melons to be added. Check
-    accompanying screenshots for details."""
-    return render_template("cart.html", cart = melon_dict)
+    #re-cast variables as variables we can pass into cart.html to use with jinja
+    return render_template("cart.html", cart = melon_dict, total = cart_total_float)
     
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
+    # if the cart already has stuff in it, add to it. if not, create a new list named 'cart' in the session dictionary
     if session.get('cart'):
         session['cart'].append(id)
     else:
         session['cart'] = [id]
 
-    print "This is the session: %r" % session
-    flash("Successfully added [THE MELON YOU CHOSE] to cart!")
-    return redirect("/cart")
-
-    """TODO: Finish shopping ca
-    rt functionality using session variables to hold
-    cart list.
-    Intended behavior: when a melon is added to a cart, redirect them to the
-    shopping cart page, while displaying the message
-    "Successfully added to cart" """
+    flash("Great choice! That's the best melon!")
+    return redirect("/melons")
 
 @app.route("/login", methods=["GET"])
 def show_login():
@@ -87,8 +85,7 @@ def process_login():
 
 @app.route("/checkout")
 def checkout():
-    """TODO: Implement a payment system. For now, just return them to the main
-    melon listing page."""
+
     flash("Sorry! Checkout will be implemented in a future version of ubermelon.")
     return redirect("/melons")
 

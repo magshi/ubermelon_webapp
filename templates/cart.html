@@ -10,12 +10,12 @@
     {% for melon, qty in cart.items() %}
     <tr>
         <td>{{ melon.common_name }}</td>
-        <td>{{ qty }}</td>
-        <td>{{ melon.price }}</td>
-        <td>{{(qty * melon.price)}}</td>
+        <td><input id="quantity" type="number" min="0" max="100" value="{{qty}}" /></td>
+        <td>${{ '%0.2f' | format(melon.price) }}</td>
+        <td>${{ '%0.2f' | format(qty * melon.price)}}</td>
     </tr>
     {% endfor %}
 </table>
-<h3>Total: $27.00</h3>
+<h3>Total: ${{ total }}</h3>
 <a href="/checkout" class="btn btn-large btn-primary">Check Out</a>
 {% endblock %}
