@@ -16,8 +16,7 @@ def index():
 def list_melons():
     """This is the big page showing all the melons ubermelon has to offer"""
     melons = model.get_melons()
-    return render_template("all_melons.html",
-                           melon_list = melons)
+    return render_template("all_melons.html", melon_list = melons)
 
 @app.route("/melon/<int:id>")
 def show_melon(id):
@@ -25,27 +24,49 @@ def show_melon(id):
     option to buy the melon."""
     melon = model.get_melon_by_id(id)
     print melon
-    return render_template("melon_details.html",
-                  display_melon = melon)
+    return render_template("melon_details.html", display_melon = melon)
 
 @app.route("/cart")
 def shopping_cart():
+    if session.get('cart'):
+        cart_list = session['cart']
+        melindex = {}
+        for item in cart_list:
+            if melindex.get(item):
+                melindex[item] += 1
+            else:
+                melindex[item] = 1
+        print cart_list
+        print melindex
+    else:
+        pass
+
+    cart_contents = {}    
+    for melon_id in melindex:
+        cart_contents[melon_id] = [model.get_melon_by_id(melon_id).common_name, model.get_melon_by_id(melon_id).price]
+    print cart_contents
+
     """TODO: Display the contents of the shopping cart. The shopping cart is a
     list held in the session that contains all the melons to be added. Check
     accompanying screenshots for details."""
-    return render_template("cart.html")
+    return render_template("cart.html", cart = cart_contents)
     
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
-    """TODO: Finish shopping cart functionality using session variables to hold
+    if session.get('cart'):
+        session['cart'].append(id)
+    else:
+        session['cart'] = [id]
+
+    flash("Successfully added [THE MELON YOU CHOSE] to cart!")
+    return redirect("/cart")
+
+    """TODO: Finish shopping ca
+    rt functionality using session variables to hold
     cart list.
-    
     Intended behavior: when a melon is added to a cart, redirect them to the
     shopping cart page, while displaying the message
     "Successfully added to cart" """
-
-    return "Oops! This needs to be implemented!"
-
 
 @app.route("/login", methods=["GET"])
 def show_login():
